@@ -3,7 +3,7 @@ import { ethers } from "ethers";
 
 import { contractABI, contractAddress } from "../utils/constants";
 
-export const TransactionContext = React.createContext();
+export const TransactionContext = React.createContext(undefined);
 
 const { ethereum } = window;
 
@@ -55,7 +55,7 @@ export const TransactionsProvider = ({ children }) => {
 
   const checkIfWalletIsConnect = async () => {
     try {
-      if (!ethereum) return alert("Please install MetaMask.");
+      if (!ethereum) return alert("Please install Web3Wallet.");
 
       const accounts = await ethereum.request({ method: "eth_accounts" });
 
@@ -88,10 +88,10 @@ export const TransactionsProvider = ({ children }) => {
 
   const connectWallet = async () => {
     try {
-      if (!ethereum) return alert("Please install MetaMask.");
+      if (!ethereum) return alert("Please install Web3Wallet.");
 
       const accounts = await ethereum.request({ method: "eth_requestAccounts", });
-
+      console.log("web3_account", accounts)
       setCurrentAccount(accounts[0]);
       window.location.reload();
     } catch (error) {
