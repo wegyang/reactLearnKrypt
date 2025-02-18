@@ -62,7 +62,7 @@ export const TransactionsProvider = ({ children }) => {
       if (accounts.length) {
         setCurrentAccount(accounts[0]);
 
-        getAllTransactions();
+        await getAllTransactions();
       } else {
         console.log("No accounts found");
       }
@@ -71,20 +71,20 @@ export const TransactionsProvider = ({ children }) => {
     }
   };
 
-  const checkIfTransactionsExists = async () => {
-    try {
-      if (ethereum) {
-        const transactionsContract = createEthereumContract();
-        const currentTransactionCount = await transactionsContract.getTransactionCount();
-
-        window.localStorage.setItem("transactionCount", currentTransactionCount);
-      }
-    } catch (error) {
-      console.log(error);
-
-      throw new Error("No ethereum object");
-    }
-  };
+  // const checkIfTransactionsExists = async () => {
+  //   try {
+  //     if (ethereum) {
+  //       const transactionsContract = createEthereumContract();
+  //       const currentTransactionCount = await transactionsContract.getTransactionCount();
+  //
+  //       window.localStorage.setItem("transactionCount", currentTransactionCount);
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //
+  //     throw new Error("No ethereum object2");
+  //   }
+  // };
 
   const connectWallet = async () => {
     try {
@@ -97,7 +97,7 @@ export const TransactionsProvider = ({ children }) => {
     } catch (error) {
       console.log(error);
 
-      throw new Error("No ethereum object");
+      throw new Error("No ethereum object1");
     }
   };
 
@@ -131,18 +131,18 @@ export const TransactionsProvider = ({ children }) => {
         setTransactionCount(transactionsCount.toNumber());
         window.location.reload();
       } else {
-        console.log("No ethereum object");
+        console.log("No ethereum object3");
       }
     } catch (error) {
       console.log(error);
 
-      throw new Error("No ethereum object");
+      throw new Error("No ethereum object4");
     }
   };
 
   useEffect(() => {
-    checkIfWalletIsConnect();
-    checkIfTransactionsExists();
+    checkIfWalletIsConnect().then(r => console.log("r1", r));
+    // checkIfTransactionsExists().then(r => console.log("r2", r));
   }, [transactionCount]);
 
   return (
