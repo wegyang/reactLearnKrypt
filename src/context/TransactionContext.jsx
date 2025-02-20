@@ -8,11 +8,17 @@ export const TransactionContext = React.createContext(undefined);
 const { ethereum } = window;
 
 const createEthereumContract = () => {
-  const provider = new ethers.providers.Web3Provider(ethereum);
+  const provider = new ethers.BrowserProvider(ethereum);
   const signer = provider.getSigner();
   const transactionsContract = new ethers.Contract(contractAddress, contractABI, signer);
-
   return transactionsContract;
+};
+
+const getChainName = async () => {
+  debugger
+  const provider = new ethers.BrowserProvider(ethereum);
+  const network = await provider.getNetwork();
+  return network.name
 };
 
 export const TransactionsProvider = ({ children }) => {
@@ -21,6 +27,8 @@ export const TransactionsProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [transactionCount, setTransactionCount] = useState(localStorage.getItem("transactionCount"));
   const [transactions, setTransactions] = useState([]);
+  const [tokens, setTokens] = useState([]);
+  const [chainName, setChainName] = useState("");
 
   const handleChange = (e, name) => {
     setformData((prevState) => ({ ...prevState, [name]: e.target.value }));
@@ -52,6 +60,8 @@ export const TransactionsProvider = ({ children }) => {
       console.log(error);
     }
   };
+
+
 
   const checkIfWalletIsConnect = async () => {
     try {
@@ -86,13 +96,45 @@ export const TransactionsProvider = ({ children }) => {
   //   }
   // };
 
+  const fetchTokenBalances = async (userAddress) => {
+    const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjQ4MTUzNWI0LTE2NjItNGFjZS1hNDlmLTc4ZGM0YTgzMTljNyIsIm9yZ0lkIjoiNDMyNTYzIiwidXNlcklkIjoiNDQ0OTU3IiwidHlwZUlkIjoiNzlhZWVjNjYtY2YxYi00YjY3LWIzNDAtYWJhMDIwOTBkNjg5IiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3NDAwMzg0MzgsImV4cCI6NDg5NTc5ODQzOH0.a3wwAv2uFHkYE6qTEmcbrjI5hEtsDxKhFDoQ2AMMmIU';
+    const chain = 'sepolia';
+    const url = `https://deep-index.moralis.io/api/v2.2/wallets/${userAddress}/tokens?chain=${chain}`;
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'X-API-Key': apiKey,
+        },
+      });
+      if (!response.ok) {
+         console.error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data.filter(token => token.balance > 0); // 过滤出余额大于 0 的代币
+    } catch (error) {
+      console.error("Error fetching token balances:", error);
+      return [];
+    }
+  };
+
+
   const connectWallet = async () => {
     try {
+      debugger
       if (!ethereum) return alert("Please install Web3Wallet.");
-
       const accounts = await ethereum.request({ method: "eth_requestAccounts", });
-      console.log("web3_account", accounts)
+      console.log("web3_account________", accounts)
       setCurrentAccount(accounts[0]);
+      const balances = await fetchTokenBalances(accounts[0]); // 或者使用 fetchBalancesFromAPI
+      setTokens(balances);
+      console.log('tokens', tokens);
+      await getChainName().then(chainName => {
+        debugger
+        console.log("chainName", chainName);
+        setChainName(chainName)
+      });
       window.location.reload();
     } catch (error) {
       console.log(error);
@@ -156,6 +198,8 @@ export const TransactionsProvider = ({ children }) => {
         sendTransaction,
         handleChange,
         formData,
+        tokens,
+        chainName,
       }}
     >
       {children}
