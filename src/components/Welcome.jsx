@@ -17,29 +17,17 @@ const Input = ({ placeholder, name, type, value, handleChange }) => (
     step="0.0001"
     value={value}
     onChange={(e) => handleChange(e, name)}
-    className="my-2 w-full rounded-sm p-2 outline-none bg-transparent text-white border-none text-sm white-glassmorphism"
+    className="my-2 w-full rounded-sm p-2 outline-none bg-transparent text-white border-none text-xs white-glassmorphism"
   />
 );
 
 const Welcome = () => {
-  const { currentAccount, connectWallet, handleChange, sendTransaction, formData, isLoading, tokens, chainName } = useContext(TransactionContext);
-
-  const handleSubmit = (e) => {
-    const { addressTo, amount, keyword, message } = formData;
-
-    e.preventDefault();
-
-    if (!addressTo || !amount || !keyword || !message) return;
-
-    sendTransaction();
-  };
-
-  console.log("tokens2", tokens);
+  const { currentAccount, connectWallet, handleChange, formData, isLoading, tokens, chainName, welToEther, changeTextArea, handleSubmit } = useContext(TransactionContext);
 
   return (
     <div className="flex w-full justify-center items-center">
-      <div className="flex flex-[0.8] md:flex-row flex-col items-start justify-between md:p-20 py-12 px-4">
-        <div className="flex flex-1 justify-start items-start flex-col md:mr-100">
+      <div className="flex flex-[0.9] md:flex-row flex-col items-start justify-between md:p-20 py-12 px-4">
+        <div className="flex flex-0.7 justify-start items-start flex-col md:mr-100">
           <h1 className="text-3xl sm:text-5xl text-white text-gradient py-1">
             Send Crypto <br /> across the world
           </h1>
@@ -98,21 +86,24 @@ const Welcome = () => {
             </div>
           </div>
 
-          <div className="p-5 sm:w-96 w-full flex flex-col justify-start items-center blue-glassmorphism">
-            {!tokens || tokens.length === 0 ? (<Input placeholder="Choose your token" name="addressTo" type="text" handleChange={handleChange}/>) : (
-                <select
+          <div className="p-5 sm:w-200 w-full flex flex-col justify-start items-center blue-glassmorphism">
+            {!tokens || tokens.length === 0 ? (<Input placeholder="Choose your token" name="chooseToken" type="text"/>) : (
+                <select defaultValue="" required
                     className="my-2 w-full rounded-sm p-2 outline-none bg-transparent text-white border-none text-sm white-glassmorphism">
-                  <option value="" className="text-white white-glassmorphism">选择您的代币</option>
+                  <option disabled hidden value="" className="text-white white-glassmorphism">Choose your token</option>
                   {tokens.map((token, index) => (
                       <option key={index} value={token.address}>
-                        {token.name} ({token.symbol}): {token.balance}
+                        {chainName} - ({token.symbol}) : {welToEther(token.balance)}
                       </option>
                   ))}
                 </select>
             )}
-            <p className="w-full text-red-500 text-sm text-left mt-3 ml-2" >addresses must match amounts</p>
-            <Input placeholder="addresses" name="addresses" type="text" handleChange={handleChange}/>
-            <Input placeholder="amounts" name="amounts" type="number" handleChange={handleChange}/>
+            <p className="w-full text-white text-xs text-left mt-3 ml-2">address,amounts</p>
+            <textarea value={formData} name="sendData" onChange={changeTextArea} className="my-2 h-32 w-full rounded-sm p-2 outline-none bg-transparent text-white border-none text-xs white-glassmorphism"></textarea>
+            {/*<p className="w-full text-red-500 text-sm text-left mt-3 ml-2" >addresses must match amounts</p>*/}
+            {/*<Input placeholder="addresses" name="addresses" type="textarea" handleChange={handleChange}/>*/}
+            {/*<p className="w-full text-red-500 text-xs text-left ml-2" >uint:Ether</p>*/}
+            {/*<Input placeholder="amounts" name="amounts" type="text" handleChange={handleChange}/>*/}
             <div className="h-[1px] w-full bg-gray-400 my-2"/>
             {isLoading
                 ? <Loader/>
