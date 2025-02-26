@@ -32,7 +32,7 @@ export const TransactionsProvider = ({ children }) => {
   // 支持的链列表(自己维护)
   const chains = [
     { id: "ethereum", name: "Ethereum" },
-    { id: "bsc", name: "Binance Smart Chain" },
+    { id: "bsc", name: "BSC" },
     { id: "polygon", name: "Polygon" },
     { id: "avalanche", name: "Avalanche" },
   ];
