@@ -1,72 +1,74 @@
-import React, { useContext } from "react";
-import { AiFillPlayCircle } from "react-icons/ai";
-import { SiEthereum } from "react-icons/si";
-import { BsInfoCircle } from "react-icons/bs";
+import React, {useContext, useState} from "react";
+import {AiFillPlayCircle} from "react-icons/ai";
+import {SiEthereum} from "react-icons/si";
+import {BsInfoCircle} from "react-icons/bs";
 
-import { TransactionContext } from "../context/TransactionContext";
-import { shortenAddress } from "../utils/shortenAddress";
-import { Loader } from ".";
+import {TransactionContext} from "../context/TransactionContext";
+import {shortenAddress} from "../utils/shortenAddress";
+import {Loader} from ".";
+import {Steps, Select} from "antd";
 
 const companyCommonStyles = "min-h-[70px] sm:px-0 px-2 sm:min-w-[120px] flex justify-center items-center border-[0.5px] border-gray-400 text-sm font-light text-white";
 
 // eslint-disable-next-line react/prop-types
-const Input = ({ placeholder, name, type, value, handleChange }) => (
-  <input
-    placeholder={placeholder}
-    type={type}
-    step="0.0001"
-    value={value}
-    onChange={(e) => handleChange(e, name)}
-    className="my-2 w-full rounded-sm p-2 outline-none bg-transparent text-white border-none text-xs white-glassmorphism"
-  />
+const Input = ({placeholder, name, type, value, handleChange}) => (
+    <input
+        placeholder={placeholder}
+        type={type}
+        step="0.0001"
+        value={value}
+        onChange={(e) => handleChange(e, name)}
+        className="my-3 w-full rounded-sm p-2 outline-none bg-transparent border-none text-xs white-glassmorphism"
+    />
 );
 
+const steps = [
+    {
+        title: 'First',
+        content: 'First-content',
+    },
+    {
+        title: 'Second',
+        content: 'Second-content',
+    },
+    {
+        title: 'Last',
+        content: 'Last-content',
+    },
+];
+
 const Welcome = () => {
-  const { currentAccount, connectWallet, handleChange, formData, isLoading, tokens, chainName, welToEther, changeTextArea, handleSubmit } = useContext(TransactionContext);
-
-  return (
-    <div className="flex w-full justify-center items-center">
-      <div className="flex flex-[0.9] md:flex-row flex-col items-start justify-between md:p-20 py-12 px-4">
-        <div className="flex flex-0.7 justify-start items-start flex-col md:mr-100">
-          <h1 className="text-3xl sm:text-5xl text-white text-gradient py-1">
-            Send Crypto <br /> across the world
-          </h1>
-          <p className="text-left mt-5 text-white font-light md:w-9/12 w-11/12 text-base">
-            Explore the crypto world. Buy and sell cryptocurrencies easily on Krypto.
-          </p>
-          {!currentAccount && (
-            <button
-              type="button"
-              onClick={connectWallet}
-              className="flex flex-row justify-center items-center my-5 bg-[#2952e3] p-3 rounded-full cursor-pointer hover:bg-[#2546bd]"
-            >
-              <AiFillPlayCircle className="text-white mr-2" />
-              <p className="text-white text-base font-semibold">
-                Connect Wallet
-              </p>
-            </button>
-          )}
-
-          <div className="grid sm:grid-cols-3 grid-cols-2 w-full mt-10">
-            <div className={`rounded-tl-2xl ${companyCommonStyles}`}>
-              Reliability
-            </div>
-            <div className={companyCommonStyles}>Security</div>
-            <div className={`sm:rounded-tr-2xl ${companyCommonStyles}`}>
-              Ethereum
-            </div>
-            <div className={`sm:rounded-bl-2xl ${companyCommonStyles}`}>
-              Web 3.0
-            </div>
-            <div className={companyCommonStyles}>Low Fees</div>
-            <div className={`rounded-br-2xl ${companyCommonStyles}`}>
-              Blockchain
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col flex-1 items-center justify-start w-full md:mt-0 mt-10">
-          <div
+    const {
+        handleChange,
+        chain,
+        chains,
+        formData,
+        isLoading,
+        tokens,
+        chainName,
+        welToEther,
+        changeTextArea,
+        handleChainChange,
+        handleSubmit
+    } = useContext(TransactionContext);
+    const [current, setCurrent] = useState(0);
+    const { Option } = Select;
+    const next = () => {
+        setCurrent(current + 1);
+    };
+    const prev = () => {
+        setCurrent(current - 1);
+    };
+    const items = steps.map((item) => ({
+        key: item.title,
+        title: item.title,
+    }));
+    return (
+        <div className="flex w-full justify-center items-center mt-10">
+            <div className="flex flex-[0.9] w-full md:flex-row flex-col items-start justify-between md:p-10 py-12 px-4">
+                <div className="flex flex-col flex-1 items-center justify-start w-full md:mt-0 mt-10">
+                    <h1 className="text-2xl font-bold mb-8">批量转账工具</h1>
+                    {/*<div
               className="p-3 flex justify-end items-start flex-col rounded-xl h-40 sm:w-72 w-full my-5 eth-card .white-glassmorphism ">
             <div className="flex justify-between flex-col w-full h-full">
               <div className="flex justify-between items-start">
@@ -84,44 +86,143 @@ const Welcome = () => {
                 </p>
               </div>
             </div>
-          </div>
+          </div> */}
+                    <Steps
+                        size="small"
+                        current={current}
+                        items={items}
+                    />
+                    {current === 0 && (
+                        <div
+                            className="p-5 mt-10 sm:w-200 w-full flex flex-col justify-start items-center blue-glassmorphism"
+                            style={{width: '900px'}}>
+                            {!tokens || tokens.length === 0 ? (
+                                    <div className="w-full flex flex-row justify-start items-center ">
+                                      {/*  <div className="w-0.3 mr-3">
+                                            <label className="block text-sm font-medium mb-2">选择链</label>
+                                            <select
+                                                value={chain}
+                                                onChange={handleChainChange}
+                                                className="my-3 w-full rounded-sm p-1.5 outline-none bg-transparent border-none text-xs white-glassmorphism">
+                                                {chains.map((chain) => (
+                                                    <option key={chain.id} value={chain.id}>
+                                                        {chain.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>*/}
 
-          <div className="p-5 sm:w-200 w-full flex flex-col justify-start items-center blue-glassmorphism">
-            {!tokens || tokens.length === 0 ? (<Input placeholder="Choose your token" name="chooseToken" type="text"/>) : (
-                <select defaultValue="" required
-                    className="my-2 w-full rounded-sm p-2 outline-none bg-transparent text-white border-none text-sm white-glassmorphism">
-                  <option disabled hidden value="" className="text-white white-glassmorphism">Choose your token</option>
-                  {tokens.map((token, index) => (
-                      <option key={index} value={token.address}>
-                        {chainName} - ({token.symbol}) : {welToEther(token.balance)}
-                      </option>
-                  ))}
-                </select>
-            )}
-            <p className="w-full text-white text-xs text-left mt-3 ml-2">address,amounts</p>
-            <textarea value={formData} name="sendData" onChange={changeTextArea} className="my-2 h-32 w-full rounded-sm p-2 outline-none bg-transparent text-white border-none text-xs white-glassmorphism"></textarea>
-            {/*<p className="w-full text-red-500 text-sm text-left mt-3 ml-2" >addresses must match amounts</p>*/}
-            {/*<Input placeholder="addresses" name="addresses" type="textarea" handleChange={handleChange}/>*/}
-            {/*<p className="w-full text-red-500 text-xs text-left ml-2" >uint:Ether</p>*/}
-            {/*<Input placeholder="amounts" name="amounts" type="text" handleChange={handleChange}/>*/}
-            <div className="h-[1px] w-full bg-gray-400 my-2"/>
-            {isLoading
-                ? <Loader/>
-                : (
-                    <button
-                        type="button"
-                        onClick={handleSubmit}
-                        className="text-white w-full mt-2 border-[1px] p-2 border-[#3d4f7c] hover:bg-[#3d4f7c] rounded-full cursor-pointer"
-                    >
-                      Send now
-                    </button>
-                )}
-          </div>
-
+                                        <div className="w-0.3 mr-3">
+                                            <label className="block text-sm font-medium mb-2">选择链</label>
+                                            <Select
+                                                value={chain}
+                                                onChange={handleChainChange}
+                                                className="my-3 w-full rounded-sm p-1.5 outline-none bg-transparent border-none text-xs white-glassmorphism"
+                                                popupClassName="white-glassmorphism"
+                                                style={{
+                                                    // marginTop: '0.75rem',
+                                                    // marginBottom: '0.75rem',
+                                                    // 对应 w-full
+                                                    // width: '100%',
+                                                    // 对应 rounded-sm
+                                                    // borderRadius: '16px',
+                                                    // 对应 p-1.5
+                                                    // padding: '0.375rem',
+                                                    // 对应 outline-none
+                                                    // outline: 'none',
+                                                    // 对应 bg-transparent
+                                                    // backgroundColor: 'transparent',
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                                                    // 对应 border-none
+                                                    // border: 'none',
+                                                    // 对应 text-xs
+                                                    fontSize: '0.75rem',
+                                                    // color: 'white',
+                                                }}
+                                                dropdownStyle={{
+                                                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                                                    backdropFilter: "blur(10px)",
+                                                    borderRadius: "8px",
+                                                    border: "none",
+                                                }}
+                                            >
+                                                {chains.map((chain) => (
+                                                    <Option key={chain.id} value={chain.id}>
+                                                        <div className="flex items-center">
+                                                            <img src={chain.icon} alt={chain.name} className="w-4 h-4 mr-2" />
+                                                            <span>{chain.name}</span>
+                                                        </div>
+                                                    </Option>
+                                                ))}
+                                            </Select>
+                                        </div>
+                                        <div className="w-full">
+                                            <label className="block text-sm font-medium mb-2">代币合约地址</label>
+                                            <Input placeholder="Choose your token" name="chooseToken" type="text"/>
+                                        </div>
+                                    </div>) : (
+                                    <select defaultValue="" required
+                                            className="my-3 w-full rounded-sm p-2 outline-none bg-transparent border-none text-sm white-glassmorphism">
+                                        <option disabled hidden value="" className="">Choose your token</option>
+                                        {tokens.map((token, index) => (
+                                            <option key={index} value={token.address} className="my-3 w-full rounded-sm p-2 outline-none bg-transparent border-none text-sm white-glassmorphism">
+                                                {chainName} - ({token.symbol}) : {welToEther(token.balance)}
+                                            </option>
+                                        ))}
+                                    </select>
+                            )}
+                            <p className="w-full text-white text-xs text-left mt-3 ml-2">address,amounts</p>
+                            <textarea value={formData} name="sendData" onChange={changeTextArea}
+                                      className="my-3 h-70 w-full rounded-sm p-2 outline-none bg-transparent border-none text-xs white-glassmorphism"></textarea>
+                            <div className="h-[1px] w-full bg-gray-400 my-2"/>
+                            {isLoading
+                                ? <Loader/>
+                                : (
+                                    <button
+                                        type="button"
+                                        onClick={next}
+                                        className=" w-full mt-2 border-[1px] p-2 border-[#3d4f7c] bg-[#2982e3] hover:bg-[#2556bd] text-white rounded-full cursor-pointer"
+                                    >
+                                        下一步
+                                    </button>
+                                )}
+                        </div>
+                    )}
+                    {current === 1 && (
+                        <div
+                            className="p-5 mt-10 sm:w-200 w-full flex flex-col justify-start items-center blue-glassmorphism">
+                            {!tokens || tokens.length === 0 ? (
+                                <Input placeholder="Choose your token" name="chooseToken" type="text"/>) : (
+                                <select defaultValue="" required
+                                        className="my-2 w-full rounded-sm p-2 outline-none bg-transparent border-none text-sm">
+                                    <option disabled hidden value="" className="">Choose your token</option>
+                                    {tokens.map((token, index) => (
+                                        <option key={index} value={token.address}>
+                                            {chainName} - ({token.symbol}) : {welToEther(token.balance)}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                            <p className="w-full text-white text-xs text-left mt-3 ml-2">address,amounts</p>
+                            <textarea value={formData} name="sendData" onChange={changeTextArea}
+                                      className="my-2 h-70 w-full rounded-sm p-2 outline-none bg-transparent border-none text-xs white-glassmorphism"></textarea>
+                            <div className="h-[1px] w-full bg-gray-400 my-2"/>
+                            {isLoading
+                                ? <Loader/>
+                                : (
+                                    <button
+                                        type="button"
+                                        onClick={next}
+                                        className=" w-full mt-2 border-[1px] p-2 border-[#3d4f7c] bg-[#2982e3] hover:bg-[#2556bd] rounded-full cursor-pointer"
+                                    >
+                                        Send now
+                                    </button>
+                                )}
+                        </div>)}
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default Welcome;

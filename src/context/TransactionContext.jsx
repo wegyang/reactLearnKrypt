@@ -27,7 +27,20 @@ export const TransactionsProvider = ({ children }) => {
   const [transactions, setTransactions] = useState([]);
   const [tokens, setTokens] = useState([]);
   const [chainName, setChainName] = useState("");
-  const [selectedToken, setSelectedToken] = useState('');
+  const [chain, setChain] = useState("ethereum"); // 当前选择的链
+
+  // 支持的链列表(自己维护)
+  const chains = [
+    { id: "ethereum", name: "Ethereum" },
+    { id: "bsc", name: "Binance Smart Chain" },
+    { id: "polygon", name: "Polygon" },
+    { id: "avalanche", name: "Avalanche" },
+  ];
+
+  // 处理链选择
+  const handleChainChange = (event) => {
+    setChain(event.target.value);
+  };
 
   const handleChange = (e, name) => {
     setformData((prevState) => ({ ...prevState, [name]: e.target.value }));
@@ -61,18 +74,6 @@ export const TransactionsProvider = ({ children }) => {
       }
     } catch (error) {
       console.log(error);
-    }
-  };
-
-  const handleTokenSelect = (e) => {
-    const selectedAddress = e.target.value;
-    setSelectedToken(selectedAddress);
-
-    if (selectedAddress) {
-      const selectedToken = tokens.find(token => token.address === selectedAddress);
-      console.log("Selected Token:", selectedToken);
-    } else {
-      console.log("No token selected.");
     }
   };
 
@@ -282,6 +283,9 @@ export const TransactionsProvider = ({ children }) => {
         welToEther,
         changeTextArea,
         handleSubmit,
+        handleChainChange,
+        chain,
+        chains,
       }}
     >
       {children}
