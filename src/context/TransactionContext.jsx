@@ -28,18 +28,22 @@ export const TransactionsProvider = ({ children }) => {
   const [tokens, setTokens] = useState([]);
   const [chainName, setChainName] = useState("");
   const [chain, setChain] = useState("ethereum"); // 当前选择的链
+  const [isOpen, setIsOpen] = useState(false); // 控制下拉菜单的显示/隐藏
 
   // 支持的链列表(自己维护)
   const chains = [
-    { id: "ethereum", name: "Ethereum" },
-    { id: "bsc", name: "BSC" },
-    { id: "polygon", name: "Polygon" },
-    { id: "avalanche", name: "Avalanche" },
+    { id: "ethereum", name: "Ethereum", "icon": "https://cryptologos.cc/logos/ethereum-eth-logo.png"},
+    { id: "bsc", name: "Binance Smart Chain", "icon": "https://cryptologos.cc/logos/binance-coin-bnb-logo.png"},
+    { id: "polygon", name: "Polygon", "icon": "https://cryptologos.cc/logos/polygon-matic-logo.png"},
+    { id: "sepolia", name: "Sepolia", "icon": "https://cryptologos.cc/logos/ethereum-pow-ethw-logo.png"},
+    { id: "bnbT", name: "BnbT", "icon": "https://cryptologos.cc/logos/bnb-bnb-logo.png"}
   ];
 
   // 处理链选择
-  const handleChainChange = (event) => {
-    setChain(event.target.value);
+  const handleChainSelect = (chain) => {
+    setChain(chain);
+    // setChain(chain.name);
+    setIsOpen(false); // 选择后关闭下拉菜单
   };
 
   const handleChange = (e, name) => {
@@ -48,33 +52,6 @@ export const TransactionsProvider = ({ children }) => {
 
   const changeTextArea = (e) => {
     setformData(e.target.value);
-  };
-
-  const getAllTransactions = async () => {
-    try {
-      if (ethereum) {
-        const transactionsContract = createEthereumContract();
-
-        const availableTransactions = await transactionsContract.getAllTransactions();
-
-        const structuredTransactions = availableTransactions.map((transaction) => ({
-          addressTo: transaction.receiver,
-          addressFrom: transaction.sender,
-          timestamp: new Date(transaction.timestamp.toNumber() * 1000).toLocaleString(),
-          message: transaction.message,
-          keyword: transaction.keyword,
-          amount: parseInt(transaction.amount._hex) / (10 ** 18)
-        }));
-
-        console.log(structuredTransactions);
-
-        setTransactions(structuredTransactions);
-      } else {
-        console.log("Ethereum is not present");
-      }
-    } catch (error) {
-      console.log(error);
-    }
   };
 
   const initWallet = async (accounts) => {
@@ -105,21 +82,6 @@ export const TransactionsProvider = ({ children }) => {
       console.log(error);
     }
   };
-
-  // const checkIfTransactionsExists = async () => {
-  //   try {
-  //     if (ethereum) {
-  //       const transactionsContract = createEthereumContract();
-  //       const currentTransactionCount = await transactionsContract.getTransactionCount();
-  //
-  //       window.localStorage.setItem("transactionCount", currentTransactionCount);
-  //     }
-  //   } catch (error) {
-  //     console.log(error);
-  //
-  //     throw new Error("No ethereum object2");
-  //   }
-  // };
 
   const fetchTokenBalances = async (userAddress) => {
     const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjQ4MTUzNWI0LTE2NjItNGFjZS1hNDlmLTc4ZGM0YTgzMTljNyIsIm9yZ0lkIjoiNDMyNTYzIiwidXNlcklkIjoiNDQ0OTU3IiwidHlwZUlkIjoiNzlhZWVjNjYtY2YxYi00YjY3LWIzNDAtYWJhMDIwOTBkNjg5IiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3NDAwMzg0MzgsImV4cCI6NDg5NTc5ODQzOH0.a3wwAv2uFHkYE6qTEmcbrjI5hEtsDxKhFDoQ2AMMmIU';
@@ -283,9 +245,12 @@ export const TransactionsProvider = ({ children }) => {
         welToEther,
         changeTextArea,
         handleSubmit,
-        handleChainChange,
+        handleChainSelect,
         chain,
+        setChain,
         chains,
+        isOpen,
+        setIsOpen,
       }}
     >
       {children}

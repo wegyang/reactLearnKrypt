@@ -26,6 +26,9 @@ importers:
       moralis:
         specifier: ^2.27.2
         version: 2.27.2
+      pnpm:
+        specifier: ^10.5.0
+        version: 10.5.1
       react:
         specifier: ^19.0.0
         version: 19.0.0
@@ -1852,6 +1855,11 @@ packages:
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
+
+  pnpm@10.5.1:
+    resolution: {integrity: sha512-xCTAdr0lwaWxiMN7scpWzB4Tb79TDZi8syiZgqCP0lUnuMnE7BE75eM5PDmvBFId1ke88dCAHq+KxqexTaMTrw==}
+    engines: {node: '>=18.12'}
+    hasBin: true
 
   possible-typed-array-names@1.0.0:
     resolution: {integrity: sha512-d7Uw+eZoloe0EHDIYoe+bQ5WXnGMOpmiZFTuMWCwpjzzkL2nTjcKiAk4hh8TjnGye2TwWOk3UXucZ+3rbmBa8Q==}
@@ -4636,6 +4644,8 @@ snapshots:
       sha.js: 2.4.11
 
   picocolors@1.1.1: {}
+
+  pnpm@10.5.1: {}
 
   possible-typed-array-names@1.0.0: {}
 

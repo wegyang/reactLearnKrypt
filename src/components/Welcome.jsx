@@ -4,11 +4,9 @@ import {SiEthereum} from "react-icons/si";
 import {BsInfoCircle} from "react-icons/bs";
 
 import {TransactionContext} from "../context/TransactionContext";
-import {shortenAddress} from "../utils/shortenAddress";
+// import {shortenAddress} from "../utils/shortenAddress";
 import {Loader} from ".";
-import {Steps, Select} from "antd";
-
-const companyCommonStyles = "min-h-[70px] sm:px-0 px-2 sm:min-w-[120px] flex justify-center items-center border-[0.5px] border-gray-400 text-sm font-light text-white";
+// import {Steps} from "antd";
 
 // eslint-disable-next-line react/prop-types
 const Input = ({placeholder, name, type, value, handleChange}) => (
@@ -41,6 +39,9 @@ const Welcome = () => {
     const {
         handleChange,
         chain,
+        isOpen,
+        setIsOpen,
+        handleChainSelect,
         chains,
         formData,
         isLoading,
@@ -48,11 +49,9 @@ const Welcome = () => {
         chainName,
         welToEther,
         changeTextArea,
-        handleChainChange,
         handleSubmit
     } = useContext(TransactionContext);
     const [current, setCurrent] = useState(0);
-    const {Option} = Select;
     const next = () => {
         setCurrent(current + 1);
     };
@@ -63,13 +62,7 @@ const Welcome = () => {
         key: item.title,
         title: item.title,
     }));
-    const [isOpen, setIsOpen] = useState(false); // 控制下拉菜单的显示/隐藏
-    const [selectedChain, setSelectedChain] = useState(""); // 当前选中的链
-    // 处理链选择
-    const handleChainSelect = (chain) => {
-        setSelectedChain(chain.name);
-        setIsOpen(false); // 选择后关闭下拉菜单
-    };
+
 
     return (
         <div className="flex w-full justify-center items-center mt-10">
@@ -95,10 +88,13 @@ const Welcome = () => {
                                         <div className="w-0.3 mr-3">
                                             {/* 自定义下拉菜单触发器 */}
                                             <div
-                                                className="my-3 w-30 rounded-sm p-2 pl-3 whitespace-nowrap overflow-hidden text-ellipsis outline-none bg-transparent border-none text-xs white-glassmorphism cursor-pointer"
+                                                className="my-3 w-30 flex rounded-sm p-2 pl-3 whitespace-nowrap overflow-hidden text-ellipsis outline-none bg-transparent border-none text-xs white-glassmorphism cursor-pointer"
                                                 onClick={() => setIsOpen(!isOpen)}
                                             >
-                                                {selectedChain || "请选择链"}
+
+                                                {chain && (<div className="flex font-bold">
+                                                    <img src={chain.icon} alt={chain.name} className="w-4 h-4 mr-1" /> {chain.name}
+                                                </div>) || "请选择链"}
                                             </div>
                                             {/* 自定义下拉菜单 */}
                                             {isOpen && (
@@ -106,9 +102,10 @@ const Welcome = () => {
                                                     {chains.map((chain) => (
                                                         <li
                                                             key={chain.id}
-                                                            className="p-1.5 text-xs hover:bg-gray-100 cursor-pointer "
+                                                            className="flex p-1.5 text-xs hover:bg-gray-100 cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis"
                                                             onClick={() => handleChainSelect(chain)}
                                                         >
+                                                            <img src={chain.icon} alt={chain.name} className="w-4 h-4 mr-1" />
                                                             {chain.name}
                                                         </li>
                                                     ))}
@@ -131,7 +128,7 @@ const Welcome = () => {
                                     ))}
                                 </select>
                             )}
-                            <p className="w-full text-white text-xs text-left mt-3 ml-2">收款地址列表（每行一个,价格用,分开）</p>
+                            <p className="w-full  text-xs text-left mt-3 ml-2">收款地址列表（每行一个,价格用,分开）</p>
                             <textarea value={formData} name="sendData" onChange={changeTextArea}
                                       className="my-3 h-70 w-full rounded-sm p-2 outline-none bg-transparent border-none text-xs white-glassmorphism"></textarea>
                             <div className="h-[1px] w-full bg-gray-400 my-2"/>
@@ -140,10 +137,10 @@ const Welcome = () => {
                                 : (
                                     <button
                                         type="button"
-                                        onClick={next}
+                                        onClick={handleSubmit}
                                         className=" w-full mt-2 border-[1px] p-2 border-[#3d4f7c] bg-[#2982e3] hover:bg-[#2556bd] text-white rounded-full cursor-pointer"
                                     >
-                                        下一步
+                                        发送
                                     </button>
                                 )}
                         </div>
