@@ -6,6 +6,7 @@ import {BsInfoCircle} from "react-icons/bs";
 import {TransactionContext} from "../context/TransactionContext";
 // import {shortenAddress} from "../utils/shortenAddress";
 import {Loader} from ".";
+import { ethers } from "ethers";
 // import {Steps} from "antd";
 
 // eslint-disable-next-line react/prop-types
@@ -42,11 +43,10 @@ const Welcome = () => {
         setIsOpen,
         handleChainSelect,
         chains,
+        chainId,
         formData,
         isLoading,
         tokens,
-        chainName,
-        welToEther,
         changeTextArea,
         handleSubmit
     } = useContext(TransactionContext);
@@ -91,7 +91,7 @@ const Welcome = () => {
                                                 onClick={() => setIsOpen(!isOpen)}
                                             >
 
-                                                {chain && (<div className="flex font-bold">
+                                                {chainId && (<div className="flex font-bold">
                                                     <img src={chain.icon} alt={chain.name} className="w-4 h-4 mr-1" /> {chain.name}
                                                 </div>) || "请选择链"}
                                             </div>
@@ -116,16 +116,54 @@ const Welcome = () => {
                                         </div>
                                     </div>
                                 </div>) : (
-                                <select defaultValue="" required
-                                        className="my-3 w-full rounded-sm p-2 outline-none bg-transparent border-none text-sm white-glassmorphism">
-                                    <option disabled hidden value="" className="">Choose your token</option>
-                                    {tokens.map((token, index) => (
-                                        <option key={index} value={token.address}
-                                                className="my-3 w-full rounded-sm p-2 outline-none bg-transparent border-none text-sm white-glassmorphism">
-                                            {chainName} - ({token.symbol}) : {welToEther(token.balance)}
-                                        </option>
-                                    ))}
-                                </select>
+                                <div className="w-full flex-col justify-start items-center ">
+                                    <div className="w-0.3 mr-3 flex items-start justify-start flex-row">
+                                        <label className="block text-sm font-medium mb-2 ml-2">选择链</label>
+                                        <label className="block text-sm font-medium mb-2 ml-25">代币合约地址</label>
+                                    </div>
+                                    <div className="flex items-center justify-center flex-row">
+                                        <div className="w-0.3 mr-3">
+                                            {/* 自定义下拉菜单触发器 */}
+                                            <div
+                                                className="my-3 w-30 flex rounded-sm p-2 pl-3 whitespace-nowrap overflow-hidden text-ellipsis outline-none bg-transparent border-none text-xs white-glassmorphism cursor-pointer"
+                                                onClick={() => setIsOpen(!isOpen)}
+                                            >
+
+                                                {chain && (<div className="flex font-bold">
+                                                    <img src={chain.icon} alt={chain.name} className="w-4 h-4 mr-1" /> {chain.name}
+                                                </div>) || "请选择链"}
+                                            </div>
+                                            {/* 自定义下拉菜单 */}
+                                            {isOpen && (
+                                                <ul className="absolute w-3/12 bg-customGreen opacity-100 border border-gray-300 rounded-sm shadow-lg z-10">
+                                                    {chains.map((chain) => (
+                                                        <li
+                                                            key={chain.id}
+                                                            className="flex p-1.5 text-xs hover:bg-gray-100 cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis"
+                                                            onClick={() => handleChainSelect(chain)}
+                                                        >
+                                                            <img src={chain.icon} alt={chain.name} className="w-4 h-4 mr-1" />
+                                                            {chain.name}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                        <div className="w-full">
+                                            <select defaultValue="" required
+                                                    className="my-3 w-full rounded-sm p-2 outline-none bg-transparent border-none text-sm white-glassmorphism">
+                                                <option disabled hidden value="" className="">Choose your token</option>
+                                                {tokens.map((token, index) => (
+                                                    <option key={index} value={token.address}
+                                                            className="my-3 w-full rounded-sm p-2 outline-none bg-transparent border-none text-sm white-glassmorphism">
+                                                        ({token.symbol}) : {ethers.formatUnits(token.balance, 'ether')}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
                             )}
                             <p className="w-full  text-xs text-left mt-3 ml-2">收款地址列表（每行一个 价格用,分开）</p>
                             <textarea value={formData} name="sendData" onChange={changeTextArea}

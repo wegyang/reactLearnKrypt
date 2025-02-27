@@ -1,7 +1,6 @@
-import React, {useEffect, useState} from "react";
-import {ethers} from "ethers";
-
-import {contractABI, contractAddress} from "../utils/constants";
+import React, { useEffect, useState } from "react";
+import { ethers } from "ethers";
+import { contractABI, contractAddress } from "../utils/constants";
 
 export const TransactionContext = React.createContext(undefined);
 
@@ -13,78 +12,75 @@ const createEthereumContract = async () => {
   return new ethers.Contract(contractAddress, contractABI, signer);
 };
 
-const getChainName = async () => {
-  const provider = new ethers.BrowserProvider(ethereum);
-  const network = await provider.getNetwork();
-  return network.name
-};
+const infura_key = "e47ec5bdf03745efa2c8fb36ae8a0a64"
 
 export const TransactionsProvider = ({ children }) => {
-  const [formData, setformData] = useState("");
+  const [formData, setFormData] = useState("");
   const [currentAccount, setCurrentAccount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [tokens, setTokens] = useState([]);
-  const [chainName, setChainName] = useState("");
-  const [chain, setChain] = useState(""); // 当前选择的链
+  const [chainId, setChainId] = useState("");
+  const [chain, setChain] = useState(null); // 当前选择的链
   const [isOpen, setIsOpen] = useState(false); // 控制下拉菜单的显示/隐藏
+  const [balance, setBalance] = useState("0"); // 账户余额
+  const [chooseLoading, setChooseLoading] = useState(false);
 
-  // 支持的链列表(自己维护)
+  // 支持的链列表
   const chains = [
-    { id: "ethereum", name: "Ethereum", "icon": "https://cryptologos.cc/logos/ethereum-eth-logo.png"},
-    { id: "bsc", name: "Binance Smart Chain", "icon": "https://cryptologos.cc/logos/binance-coin-bnb-logo.png"},
-    { id: "polygon", name: "Polygon", "icon": "https://cryptologos.cc/logos/polygon-matic-logo.png"},
-    { id: "sepolia", name: "Sepolia", "icon": "https://cryptologos.cc/logos/ethereum-pow-ethw-logo.png"},
-    { id: "bnbT", name: "BnbT", "icon": "https://cryptologos.cc/logos/bnb-bnb-logo.png"}
+    { id: "0x1", name: "Ethereum", rpcUrl: "https://mainnet.infura.io/v3/" + infura_key, icon: "https://cryptologos.cc/logos/ethereum-eth-logo.png" },
+    { id: "0x38", name: "Binance Smart Chain", rpcUrl: "https://bsc.rpc.blxrbdn.com", icon: "https://cryptologos.cc/logos/binance-coin-bnb-logo.png" },
+    { id: "0x89", name: "Polygon", rpcUrl: "https://polygon-rpc.com/", icon: "https://cryptologos.cc/logos/polygon-matic-logo.png"},
+    { id: "0xaa36a7", name: "Sepolia", rpcUrl: "https://sepolia.infura.io/" + infura_key, icon: "https://cryptologos.cc/logos/ethereum-pow-ethw-logo.png" },
+    { id: "0x61", name: "BnbT", rpcUrl: "https://data-seed-prebsc-1-s1.binance.org:8545/", icon: "https://cryptologos.cc/logos/bnb-bnb-logo.png" }
   ];
 
   // 处理链选择
-  const handleChainSelect = (chain) => {
-    setChain(chain);
-    // setChain(chain.name);
-    setIsOpen(false); // 选择后关闭下拉菜单
-  };
-
-  const handleChange = (e, name) => {
-    setformData((prevState) => ({ ...prevState, [name]: e.target.value }));
-  };
-
-  const changeTextArea = (e) => {
-    setformData(e.target.value);
-  };
-
-  const initWallet = async (accounts) => {
-    await getChainName().then(chainName => {
-      console.log("chainName", chainName);
-      setChainName(chainName)
-    });
-    setCurrentAccount(accounts[0]);
-    const balances = await fetchTokenBalances(accounts[0]);
-    setTokens(balances);
-    console.log('tokens', tokens);
-  }
-
-  const welToEther = (balanceInWei) => {
-    return ethers.formatUnits(balanceInWei, 'ether');
-  }
-
-  const checkIfWalletIsConnect = async () => {
+  const handleChainSelect = async (selectedChain) => {
+    console.log("selectedChain", selectedChain.id);
     try {
-      if (!ethereum) return alert("Please install Web3Wallet.");
-      const accounts = await ethereum.request({ method: "eth_accounts" });
-      if (accounts.length) {
-        await initWallet(accounts)
-      }
-
-      // await getAllTransactions();
+      await ethereum.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: selectedChain.id }],
+      });
     } catch (error) {
-      console.log(error);
+      console.error("switchEthereumChain", error);
+    }
+
+
+    setChain(selectedChain);
+    setIsOpen(false); // 选择后关闭下拉菜单
+    // 切换链后重新初始化钱包
+    if (ethereum && currentAccount) {
+      setChooseLoading(true);
+      await initWallet(currentAccount, selectedChain.rpcUrl);
+      setChainId(selectedChain.id);
+      localStorage.setItem('chainId', JSON.stringify(selectedChain.id))
+      setChooseLoading(false)
     }
   };
 
-  const fetchTokenBalances = async (userAddress) => {
+  // 初始化钱包
+  const initWallet = async (account, rpcUrl) => {
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const network = await provider.getNetwork();
+    console.log('network', network);
+    const balances = await fetchTokenBalances(account, chain.id);
+    console.log('balances', balances);
+    setTokens(balances);
+
+    const chainId = localStorage.getItem('chainId');
+    setChain(chainId);
+
+    const balanceWei = await provider.getBalance(account);
+    const balanceEth = ethers.formatEther(balanceWei);
+    console.log("balanceWei", balanceWei);
+    setBalance(balanceEth);
+  };
+
+  // 获取代币余额
+  const fetchTokenBalances = async (userAddress, chainId) => {
     const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjQ4MTUzNWI0LTE2NjItNGFjZS1hNDlmLTc4ZGM0YTgzMTljNyIsIm9yZ0lkIjoiNDMyNTYzIiwidXNlcklkIjoiNDQ0OTU3IiwidHlwZUlkIjoiNzlhZWVjNjYtY2YxYi00YjY3LWIzNDAtYWJhMDIwOTBkNjg5IiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3NDAwMzg0MzgsImV4cCI6NDg5NTc5ODQzOH0.a3wwAv2uFHkYE6qTEmcbrjI5hEtsDxKhFDoQ2AMMmIU';
-    const chain = chainName ? chainName : 'eth';
-    const url = `https://deep-index.moralis.io/api/v2.2/wallets/${userAddress}/tokens?chain=${chain}`;
+    const url = `https://deep-index.moralis.io/api/v2.2/wallets/${userAddress}/tokens?chain=${chainId}`;
     try {
       const response = await fetch(url, {
         method: 'GET',
@@ -94,76 +90,82 @@ export const TransactionsProvider = ({ children }) => {
         },
       });
       if (!response.ok) {
-         console.error(`HTTP error! status: ${response.status}`);
+        console.error(`HTTP error! status: ${response.status}`);
       }
       const data = await response.json();
-      return data.result.filter(token => token.balance > 0); // 过滤出余额大于 0 的代币
+      return data.result.filter(token => token.balance >= 0); // 过滤出余额大于 0 的代币
     } catch (error) {
       console.error("Error fetching token balances:", error);
       return [];
     }
   };
 
-
-  const connectWallet = async () => {
+  // 检查钱包是否已连接
+  const checkIfWalletIsConnect = async () => {
     try {
       if (!ethereum) return alert("Please install Web3Wallet.");
-      const accounts = await ethereum.request({ method: "eth_requestAccounts", });
-      await initWallet(accounts);
-      // setCurrentAccount(accounts[0]);
-      // const balances = await fetchTokenBalances(accounts[0]);
-      // setTokens(balances);
-      // console.log('tokens', tokens);
-      // await getChainName().then(chainName => {
-      //   console.log("chainName", chainName);
-      //   setChainName(chainName)
-      // });
-      // window.location.reload();
+      const accounts = await ethereum.request({ method: "eth_accounts" });
+      if (accounts.length) {
+        setCurrentAccount(accounts[0]);
+        // 获取当前钱包链接的链 ID
+        const chainId = await ethereum.request({ method: "eth_chainId" });
+        const selectedChain = chains.find((chain) => chain.id === chainId);
+        if (selectedChain) {
+          setChain(selectedChain);
+          localStorage.setItem('chain', JSON.stringify(selectedChain)); // 保存到本地存储
+          await initWallet(accounts[0], selectedChain.rpcUrl);
+        } else {
+          // 如果没有匹配的链，使用默认链
+          const defaultChain = chains[0];
+          setChain(defaultChain);
+          localStorage.setItem('chain', JSON.stringify(defaultChain)); // 保存到本地存储
+          await initWallet(accounts[0], defaultChain.rpcUrl);
+        }
+      }
     } catch (error) {
       console.log(error);
-
-      throw new Error("No ethereum object1");
     }
   };
 
+  // 连接钱包
+  const connectWallet = async () => {
+    try {
+      if (!ethereum) return alert("Please install Web3Wallet.");
+      const accounts = await ethereum.request({ method: "eth_requestAccounts" });
+      setCurrentAccount(accounts[0]);
+      await initWallet(accounts[0], chain?.rpcUrl || chains[0].rpcUrl);
+    } catch (error) {
+      console.log(error);
+      throw new Error("No ethereum object");
+    }
+  };
+
+  // 发送交易
   const sendTransaction = async (addresses, amounts) => {
     try {
       if (ethereum) {
-        console.log("amounts",amounts)
         const provider = new ethers.BrowserProvider(ethereum);
         const signer = await provider.getSigner();
-        const signerAddress = await signer.getAddress();
-        // 初始化调用合约
         const transactionsContract = await createEthereumContract();
-        // gas
-        const gasLimit = ethers.parseUnits('1000000', 'wei');
-        // 金额计算
+
         const totalAmount = amounts.reduce((sum, amount) => sum + amount, 0n);
-        const balance = await provider.getBalance(signerAddress);
+        const balance = await provider.getBalance(currentAccount);
         if (balance < totalAmount) {
-          console.error("Insufficient balance");
-          return { success: false, error: "Insufficient balance" };
+          throw new Error("Insufficient balance");
         }
-        // 调用合约的批量转账方法
+
         const transactionResponse = await transactionsContract.batchTransfer(addresses, amounts, {
-          gasLimit: gasLimit,
+          gasLimit: ethers.parseUnits('1000000', 'wei'),
           value: totalAmount
         });
-        console.log('transactionResponse', transactionResponse)
 
         setIsLoading(true);
-        console.log(`Loading - ${transactionResponse.hash}`);
-
-        // 等待交易确认
         await transactionResponse.wait();
-        console.log(`Success - ${transactionResponse.hash}`);
         setIsLoading(false);
 
-        // 返回发送成功通知
         return { success: true, transactionHash: transactionResponse.hash };
       } else {
-        console.log("No Ethereum object detected");
-        return { success: false, error: "No Ethereum object detected" };
+        throw new Error("No Ethereum object detected");
       }
     } catch (error) {
       console.error("Error during batch transfer:", error);
@@ -171,45 +173,26 @@ export const TransactionsProvider = ({ children }) => {
     }
   };
 
+  // 表单提交
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      console.log("handleSubmitFormData", formData);
-
-      // 移除多余的空格和换行符
       const cleanedInput = formData.replace(/\s+/g, ' ').trim();
-      console.log('cleanedInput', cleanedInput);
-
-      // 按换行符后跟空格分割
       const pairs = cleanedInput.split(' ').map(pair => pair.trim());
 
       const addresses = [];
       const amounts = [];
 
-      console.log("pairs", pairs);
-
       for (const pair of pairs) {
-        if (!pair) continue; // 跳过空行
-
+        if (!pair) continue;
         const [address, amount] = pair.split(',');
-        console.log('pair', pair);
-        // 检查地址是否有效
-        if (!ethers.isAddress(address)) {
-          throw new Error(`Invalid Ethereum address: ${address}`);
-        }
-
-        // 检查数值是否有效
-        if (isNaN(Number(amount)) || Number(amount) <= 0) {
-          throw new Error(`Invalid amount: ${amount}`);
-        }
+        if (!ethers.isAddress(address)) throw new Error(`Invalid Ethereum address: ${address}`);
+        if (isNaN(Number(amount)) || Number(amount) <= 0) throw new Error(`Invalid amount: ${amount}`);
         addresses.push(address);
-        amounts.push(ethers.parseEther(amount)); // 将数值转换为 Wei
+        amounts.push(ethers.parseEther(amount));
       }
 
-      // 调用批量转账函数
       const result = await sendTransaction(addresses, amounts);
-
       if (result.success) {
         alert(`Batch transfer successful! Transaction Hash: ${result.transactionHash}`);
       } else {
@@ -221,35 +204,64 @@ export const TransactionsProvider = ({ children }) => {
     }
   };
 
+  // 监听链变化
+  const handleChainChanged = async (chainId) => {
+    console.log("Chain changed to:", chainId);
+    const selectedChain = chains.find((chain) => chain.id === chainId);
+    if (selectedChain) {
+      setChain(selectedChain);
+      localStorage.setItem('chain', JSON.stringify(selectedChain)); // 保存到本地存储
+      if (currentAccount) {
+        await initWallet(currentAccount, selectedChain.rpcUrl);
+      }
+    }
+  };
+
+  // useEffect(() => {
+  //   checkIfWalletIsConnect();
+  //   // 监听链变化
+  //   if (ethereum) {
+  //     ethereum.on("chainChanged", handleChainChanged);
+  //   }
+  //   // 清理监听器
+  //   return () => {
+  //     if (ethereum) {
+  //       ethereum.removeListener("chainChanged", handleChainChanged);
+  //     }
+  //   };
+  // }, []);
+
+
   useEffect(() => {
-    checkIfWalletIsConnect().then(r => console.log("r1", r));
-    // checkIfTransactionsExists().then(r => console.log("r2", r));
-    localStorage.setItem('chainName', JSON.stringify(chainName));
-  }, [chainName]);
+    if (chain && currentAccount) {
+      initWallet(currentAccount, chain.rpcUrl);
+    }
+  }, [chain]);
+
 
   return (
-    <TransactionContext.Provider
-      value={{
-        connectWallet,
-        currentAccount,
-        isLoading,
-        sendTransaction,
-        handleChange,
-        formData,
-        tokens,
-        chainName,
-        welToEther,
-        changeTextArea,
-        handleSubmit,
-        handleChainSelect,
-        chain,
-        setChain,
-        chains,
-        isOpen,
-        setIsOpen,
-      }}
-    >
-      {children}
-    </TransactionContext.Provider>
+      <TransactionContext.Provider
+          value={{
+            connectWallet,
+            currentAccount,
+            isLoading,
+            chainId,
+            sendTransaction,
+            handleChange: (e, name) => setFormData((prev) => ({ ...prev, [name]: e.target.value })),
+            formData,
+            tokens,
+            balance,
+            changeTextArea: (e) => setFormData(e.target.value),
+            handleSubmit,
+            handleChainSelect,
+            chain,
+            chains,
+            isOpen,
+            setIsOpen,
+            chooseLoading
+          }}
+      >
+        {children}
+      </TransactionContext.Provider>
   );
 };
