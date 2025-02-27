@@ -43,7 +43,7 @@ const Welcome = () => {
         setIsOpen,
         handleChainSelect,
         chains,
-        chainId,
+        // sChain,
         formData,
         isLoading,
         tokens,
@@ -91,7 +91,7 @@ const Welcome = () => {
                                                 onClick={() => setIsOpen(!isOpen)}
                                             >
 
-                                                {chainId && (<div className="flex font-bold">
+                                                {chain && (<div className="flex font-bold">
                                                     <img src={chain.icon} alt={chain.name} className="w-4 h-4 mr-1" /> {chain.name}
                                                 </div>) || "请选择链"}
                                             </div>
