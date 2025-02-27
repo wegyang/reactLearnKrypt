@@ -23,11 +23,9 @@ export const TransactionsProvider = ({ children }) => {
   const [formData, setformData] = useState("");
   const [currentAccount, setCurrentAccount] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [transactionCount, setTransactionCount] = useState(localStorage.getItem("transactionCount"));
-  const [transactions, setTransactions] = useState([]);
   const [tokens, setTokens] = useState([]);
   const [chainName, setChainName] = useState("");
-  const [chain, setChain] = useState("ethereum"); // 当前选择的链
+  const [chain, setChain] = useState(""); // 当前选择的链
   const [isOpen, setIsOpen] = useState(false); // 控制下拉菜单的显示/隐藏
 
   // 支持的链列表(自己维护)
@@ -232,9 +230,7 @@ export const TransactionsProvider = ({ children }) => {
   return (
     <TransactionContext.Provider
       value={{
-        transactionCount,
         connectWallet,
-        transactions,
         currentAccount,
         isLoading,
         sendTransaction,

@@ -37,7 +37,6 @@ const steps = [
 
 const Welcome = () => {
     const {
-        handleChange,
         chain,
         isOpen,
         setIsOpen,
@@ -128,7 +127,7 @@ const Welcome = () => {
                                     ))}
                                 </select>
                             )}
-                            <p className="w-full  text-xs text-left mt-3 ml-2">收款地址列表（每行一个,价格用,分开）</p>
+                            <p className="w-full  text-xs text-left mt-3 ml-2">收款地址列表（每行一个 价格用,分开）</p>
                             <textarea value={formData} name="sendData" onChange={changeTextArea}
                                       className="my-3 h-70 w-full rounded-sm p-2 outline-none bg-transparent border-none text-xs white-glassmorphism"></textarea>
                             <div className="h-[1px] w-full bg-gray-400 my-2"/>
