@@ -2,6 +2,9 @@ import React, {useContext} from "react";
 import { HiMenuAlt4 } from "react-icons/hi";
 import {AiFillWallet, AiOutlineClose} from "react-icons/ai";
 
+import { DownOutlined, LogoutOutlined } from '@ant-design/icons';
+import { Dropdown, Space } from 'antd'
+
 import logo from "../../images/logo.png";
 import { shortenAddress } from "../utils/shortenAddress";
 import {TransactionContext} from "../context/TransactionContext.jsx";
@@ -9,6 +12,14 @@ import {TransactionContext} from "../context/TransactionContext.jsx";
 const NavBarItem = ({ title, classprops }) => (
   <li className={`mx-4 cursor-pointer ${classprops}`}>{title}</li>
 );
+
+const items = [
+    {
+        key: '1',
+        label: '断开连接',
+        icon: <LogoutOutlined />,
+        // extra: '⌘S',
+    }]
 
 const Navbar = () => {
   const [toggleMenu, setToggleMenu] = React.useState(false);
@@ -24,7 +35,21 @@ const Navbar = () => {
         {/*  <NavBarItem key={item + index} title={item} />*/}
         {/*))}*/}
         <li className={`bg-[#2952e3] py-2 px-4 mx-4 rounded-full ${currentAccount? '' : 'cursor-pointer'} hover:bg-[#2546bd]`}>
-            {currentAccount ? ( <p className="">{shortenAddress(currentAccount)}</p>) : (
+            {currentAccount ? (
+                // <p className="cursor-pointer">{shortenAddress(currentAccount)}</p>
+                <Dropdown
+                    menu={{
+                        items,
+                    }}
+                >
+                    <a onClick={(e) => e.preventDefault()}>
+                        <Space>
+                            {shortenAddress(currentAccount)}
+                            <DownOutlined />
+                        </Space>
+                    </a>
+                </Dropdown>
+                ) : (
                 <button
                     type="button"
                     onClick={connectWallet}

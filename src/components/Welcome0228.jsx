@@ -48,10 +48,7 @@ const Welcome = () => {
         isLoading,
         tokens,
         changeTextArea,
-        handleSubmit,
-        selected,
-        setSelected,
-        handleOptionClick,
+        handleSubmit
     } = useContext(TransactionContext);
     const [current, setCurrent] = useState(0);
     const next = () => {
@@ -64,7 +61,7 @@ const Welcome = () => {
         key: item.title,
         title: item.title,
     }));
-    console.log("current", chain);
+
 
     return (
         <div className="flex w-full justify-center items-center mt-10">
@@ -153,27 +150,16 @@ const Welcome = () => {
                                             )}
                                         </div>
                                         <div className="w-full">
-                                            <div className="custom-select relative">
-                                                <div
-                                                    className="select-selected my-3 w-full rounded-sm p-1.5 outline-none bg-transparent border-none text-sm white-glassmorphism cursor-pointer"
-                                                    onClick={() => setSelected(selected === 'Choose your token' ? 'open' : 'Choose your token')}
-                                                >
-                                                    {selected === 'open' ? 'Choose your token' : selected}
-                                                </div>
-                                                {selected === 'open' && (
-                                                    <div className="select-items absolute text-sm bg-white border border-gray-300 w-full rounded-sm">
-                                                        {tokens.map((token, index) => (
-                                                            <div
-                                                                key={index}
-                                                                className="h-8 option p-2 bg-customGreen rounded-sm shadow-lg cursor-pointer hover:bg-gray-100"
-                                                                onClick={() => handleOptionClick(`(${token.symbol || chain.symbol}) : ${ethers.formatUnits(token.balance, 'ether')}`)}
-                                                            >
-                                                                ({token.symbol || chain.symbol}) : {ethers.formatUnits(token.balance, 'ether')}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
+                                            <select defaultValue="" required
+                                                    className="my-3 w-full rounded-sm p-2 outline-none bg-transparent border-none text-sm white-glassmorphism">
+                                                <option disabled hidden value="" className="">Choose your token</option>
+                                                {tokens.map((token, index) => (
+                                                    <option key={index} value={token.address}
+                                                            className="my-3 w-full rounded-sm p-2 outline-none bg-transparent border-none text-sm white-glassmorphism">
+                                                        ({token.symbol || chain.symbol}) : {ethers.formatUnits(token.balance, 'ether')}
+                                                    </option>
+                                                ))}
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
