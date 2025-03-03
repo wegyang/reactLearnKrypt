@@ -137,6 +137,21 @@ export const TransactionsProvider = ({ children }) => {
     }
   };
 
+  const disconnectWallet = async () => {
+    try {
+      const accounts = await ethereum.request({ method: "eth_accounts" });
+      await ethereum.request({ method: "wallet_revokePermissions", params: [{eth_accounts: accounts[0]}] });
+      setCurrentAccount("");
+      setChain(null);
+      setBalance("0");
+      setTokens([]);
+      cachedData.current = {};
+      window.location.reload()
+    } catch (error) {
+      console.error("Error connecting wallet:", error);
+    }
+  }
+
   const sendTransaction = async (addresses, amounts) => {
     try {
       if (!ethereum) throw new Error("Please install Web3Wallet.");
@@ -227,7 +242,7 @@ export const TransactionsProvider = ({ children }) => {
         ethereum.removeListener("chainChanged", handleChainChanged);
       }
     };
-  }, []);
+  }, [currentAccount]);
 
   return (
       <TransactionContext.Provider
@@ -251,6 +266,7 @@ export const TransactionsProvider = ({ children }) => {
             selected,
             setSelected,
             handleOptionClick,
+            disconnectWallet,
           }}
       >
         {children}

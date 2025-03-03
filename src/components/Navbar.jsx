@@ -7,23 +7,27 @@ import { Dropdown, Space } from 'antd'
 
 import logo from "../../images/logo.png";
 import { shortenAddress } from "../utils/shortenAddress";
-import {TransactionContext} from "../context/TransactionContext.jsx";
+import {TransactionContext} from "../context/TransactionContext";
 
 const NavBarItem = ({ title, classprops }) => (
   <li className={`mx-4 cursor-pointer ${classprops}`}>{title}</li>
 );
 
-const items = [
-    {
-        key: '1',
-        label: '断开连接',
-        icon: <LogoutOutlined />,
-        // extra: '⌘S',
-    }]
+
 
 const Navbar = () => {
   const [toggleMenu, setToggleMenu] = React.useState(false);
-  const { currentAccount, connectWallet } = useContext(TransactionContext);
+  const { currentAccount, connectWallet, disconnectWallet } = useContext(TransactionContext);
+
+    const items = [
+        {
+            key: '1',
+            label: '断开连接',
+            icon: <LogoutOutlined />,
+            onClick: disconnectWallet,
+            // extra: '⌘S',
+        }]
+
 
   return (
     <nav className="w-full flex md:justify-center justify-between items-center p-4">
@@ -57,7 +61,8 @@ const Navbar = () => {
                 >
                     <AiFillWallet className="text-white mt-1 mr-2" />
                     <p className="text-white text-base font-semibold">
-                        Connect Wallet
+                        {/*Connect Wallet*/}
+                        连接钱包
                     </p>
                 </button>
                 )
