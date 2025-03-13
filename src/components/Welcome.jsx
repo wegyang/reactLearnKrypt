@@ -67,10 +67,10 @@ const Welcome = () => {
     console.log("current", chain);
 
     return (
-        <div className="flex w-full justify-center items-center mt-10">
+        <div className="flex w-full justify-center items-center mt-0">
             <div className="flex flex-[0.9] w-full md:flex-row flex-col items-start justify-between md:p-10 py-12 px-4">
                 <div className="flex flex-col flex-1 items-center justify-start w-full md:mt-0 mt-10">
-                    <h1 className="text-2xl font-bold mb-8">批量转账工具</h1>
+                    <h1 className="text-2xl font-bold mb-4">批量转账工具</h1>
                     {/*<Steps
                         size="small"
                         current={current}

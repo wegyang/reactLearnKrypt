@@ -59,6 +59,7 @@ export const TransactionsProvider = ({ children }) => {
 
   const handleChainSelect = async (selectedChain) => {
     setIsOpen(false);
+    console.log("selectedChain", selectedChain);
     try {
       const cachedChainData = cachedData.current[selectedChain.id];
       if (cachedChainData) {
@@ -74,6 +75,7 @@ export const TransactionsProvider = ({ children }) => {
           cachedData.current[selectedChain.id] = data;
         }
       }
+      console.log("selectedChain222", selectedChain);
     } catch (error) {
       console.error("Error switching chain:", error);
     }
