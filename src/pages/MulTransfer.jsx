@@ -90,39 +90,47 @@ const MulTransfer = () => {
         addressInputRef.current.click();
     };
     const handleAddressCodeMirrorChange = React.useCallback((value) => {
-        console.log(value);
         invalidCheck('address', value)
         setAddressContent(value);
     }, []);
 
     const invalidCheck = (type, content) => {
-        const invalidLines = []; // 存储无效地址的行号
-        const lines = content.split('\n').filter((line) => line.trim() !== '');
-        // 检查每一行是否是有效的钱包地址
+        const invalidLines = [];
+        const lines = content.split('\n').filter(line => line.trim()!== '');
+        // 如果没有有效行，直接清空对应无效项状态
+        if (lines.length === 0) {
+            type === 'address'
+                ? setInvalidAddressLines([])
+                : setInvalidPrivateKeyLines([]);
+            return;
+        }
+        // 遍历每一行进行有效性检查
         lines.forEach((line, index) => {
+            const trimmedLine = line.trim();
+            let isValid;
+
             if (type === 'address') {
-                if (!ethers.isAddress(line.trim())) {
-                    invalidLines.push({line: index + 1, content: line.trim()}); // 记录无效地址的行号和内容
-                    setInvalidAddressLines(invalidLines);
-                } else {
-                    setInvalidAddressLines([]);
-                }
+                // 检查是否为有效的以太坊地址
+                isValid = ethers.isAddress(trimmedLine);
             } else {
-                // 检查是否为正确的私钥
-                // 检查是否为正确的私钥
                 try {
                     // 尝试使用私钥创建一个钱包实例
-                    new ethers.Wallet(line.trim());
-                    setInvalidPrivateKeyLines([]);
+                    new ethers.Wallet(trimmedLine);
+                    isValid = true;
                 } catch {
-                    // 如果创建失败，说明私钥无效
-                    invalidLines.push({line: index + 1, content: line.trim()});
-                    setInvalidPrivateKeyLines(invalidLines);
+                    isValid = false;
                 }
-
+            }
+            // 如果无效，记录行号和内容
+            if (!isValid) {
+                invalidLines.push({ line: index + 1, content: trimmedLine });
             }
         });
-    }
+        // 根据类型更新对应的无效项状态
+        type === 'address'
+            ? setInvalidAddressLines(invalidLines)
+            : setInvalidPrivateKeyLines(invalidLines);
+    };
 
     return (
         <div className="flex w-full justify-center items-center mt-0">
@@ -351,7 +359,6 @@ const MulTransfer = () => {
                         )}
                     </div>
                 </div>
-
             </div>
         </div>
     )
