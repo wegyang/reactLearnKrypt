@@ -1,0 +1,63 @@
+.content {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.listTitle {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.qualification {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 5px;
+}
+
+.qualification li {
+    margin-bottom: 10px;
+}
+
+.form-container {
+    background: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.form-item {
+    flex: 1;
+    margin-right: 20px;
+    margin-bottom: 10px;
+
+}
+
+.form-item label {
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.btnBox {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.feeTips {
+    margin-top: 10px;
+    color: #666;
+}
+
+.green {
+    color: #52c41a;
+}
+
+.a_link {
+    cursor: pointer;
+}

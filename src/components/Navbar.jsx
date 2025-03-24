@@ -63,7 +63,7 @@ const Navbar = () => {
             title: "多对多",
             options: [
                 {label: "多对多转账", path: "/mulTransfer"},
-                {label: "zzzz", path: "/zzzz"}
+                {label: "捆绑交易", path: "/Bundle"}
             ]
         }
     ];

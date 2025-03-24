@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { ethers } from "ethers";
 import { contractABI, contractAddresses } from "../utils/constants";
+import chains from "../utils/chainsConfig.jsx";
 
 export const TransactionContext = React.createContext();
 
@@ -14,6 +15,7 @@ const createEthereumContract = async (chainId) => {
 };
 
 const infura_key = "e47ec5bdf03745efa2c8fb36ae8a0a64";
+const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjQ4MTUzNWI0LTE2NjItNGFjZS1hNDlmLTc4ZGM0YTgzMTljNyIsIm9yZ0lkIjoiNDMyNTYzIiwidXNlcklkIjoiNDQ0OTU3IiwidHlwZUlkIjoiNzlhZWVjNjYtY2YxYi00YjY3LWIzNDAtYWJhMDIwOTBkNjg5IiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3NDAwMzg0MzgsImV4cCI6NDg5NTc5ODQzOH0.a3wwAv2uFHkYE6qTEmcbrjI5hEtsDxKhFDoQ2AMMmIU';
 
 export const TransactionsProvider = ({ children }) => {
   const [formData, setFormData] = useState("");
@@ -25,19 +27,15 @@ export const TransactionsProvider = ({ children }) => {
   const [balance, setBalance] = useState("0");
   const [chooseLoading, setChooseLoading] = useState(false);
   const [selected, setSelected] = useState('Choose your token');
+  const [gasFees, setGasFees] = useState([
+    { fee: "--", name: "gasPrice", icon: "" },
+    { fee: "--", name: "maxFeePerGas", icon: "" },
+    { fee: "--", name: "maxPriorityFeePerGas", icon: "" },
+  ]);
 
   const cachedData = useRef({}); // 缓存所有链的数据
 
-  const chains = [
-    { id: "0x1", name: "Ethereum", rpcUrl: `https://mainnet.infura.io/v3/${infura_key}`, icon: "https://cryptologos.cc/logos/ethereum-eth-logo.png" },
-    { id: "0x38", name: "Binance Smart Chain", rpcUrl: "https://bsc.rpc.blxrbdn.com", icon: "https://cryptologos.cc/logos/binance-coin-bnb-logo.png", symbol: "BNB" },
-    { id: "0x89", name: "Polygon", rpcUrl: "https://polygon-rpc.com/", icon: "https://cryptologos.cc/logos/polygon-matic-logo.png", symbol: "POL" },
-    { id: "0xa4b1", name: "Arbitrum", rpcUrl: `https://arbitrum-mainnet.infura.io/v3/${infura_key}`, icon: "https://cryptologos.cc/logos/arbitrum-arb-logo.png", symbol: "ETH" },
-    { id: "0xa86a", name: "Avalanche", rpcUrl: `https://avalanche-mainnet.infura.io/v3/${infura_key}`, icon: "https://cryptologos.cc/logos/avalanche-avax-logo.png", symbol: "AVAX" },
-    { id: "0xfa", name: "Fantom", rpcUrl: "https://rpc.ftm.tools/", icon: "https://cryptologos.cc/logos/fantom-ftm-logo.png", symbol: "FTM" },
-    { id: "0xaa36a7", name: "Sepolia", rpcUrl: `https://sepolia.infura.io/v3/${infura_key}`, icon: "https://cryptologos.cc/logos/ethereum-pow-ethw-logo.png", symbol: "ETH" },
-    { id: "0x61", name: "BnbT", rpcUrl: "https://data-seed-prebsc-1-s1.binance.org:8545/", icon: "https://cryptologos.cc/logos/bnb-bnb-logo.png", symbol: "BNBt" },
-  ];
+
 
   const preloadChainData = async (account, rpcUrl, chainId) => {
     try {
@@ -53,9 +51,60 @@ export const TransactionsProvider = ({ children }) => {
     }
   };
 
+  const displayRpcUrl = chain && chain.rpcUrl
+      ? chain.rpcUrl.split(infura_key)[0]
+      : '';
+
   const handleOptionClick = (option) => {
     setSelected(option);
   };
+
+  // 获取 Gas Fee 的函数
+  const fetchGasFees = async () => {
+      // 获取 Gas Fee 数据
+    const url = `https://site1.moralis-nodes.com/${chain.mName}`;
+    try {
+      const provider = new ethers.JsonRpcProvider(chain.rpcUrl);
+
+      // 获取 Gas Fee 数据
+      const feeData = await provider.getFeeData();
+      // 更新 gasFees
+      setGasFees([
+        {
+          fee: ethers.formatUnits(feeData.gasPrice, "gwei"),
+          name: "gasPrice",
+          icon: "",
+        },
+        {
+          fee: ethers.formatUnits(feeData.maxFeePerGas, "gwei"),
+          name: "maxFeePerGas",
+          icon: "",
+        },
+        {
+          fee: ethers.formatUnits(feeData.maxPriorityFeePerGas, "gwei"),
+          name: "maxPriorityFeePerGas",
+          icon: "",
+        },
+      ]);
+      console.log("gasFees", feeData, gasFees)
+    } catch (error) {
+      console.error("Error fetching gas fees:", error);
+    }
+  };
+
+  // 使用 useEffect 实现轮询
+  useEffect(() => {
+    if (!chain) {
+      return;
+    }
+    // 初始加载
+    fetchGasFees();
+    // 设置轮询间隔（10 秒）
+    const intervalId = setInterval(fetchGasFees, 10000);
+
+    // 清除定时器
+    return () => clearInterval(intervalId);
+  }, [chain]);
 
   const handleChainSelect = async (selectedChain) => {
     setIsOpen(false);
@@ -97,7 +146,6 @@ export const TransactionsProvider = ({ children }) => {
   };
 
   const fetchTokenBalances = async (userAddress, chainId) => {
-    const apiKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJub25jZSI6IjQ4MTUzNWI0LTE2NjItNGFjZS1hNDlmLTc4ZGM0YTgzMTljNyIsIm9yZ0lkIjoiNDMyNTYzIiwidXNlcklkIjoiNDQ0OTU3IiwidHlwZUlkIjoiNzlhZWVjNjYtY2YxYi00YjY3LWIzNDAtYWJhMDIwOTBkNjg5IiwidHlwZSI6IlBST0pFQ1QiLCJpYXQiOjE3NDAwMzg0MzgsImV4cCI6NDg5NTc5ODQzOH0.a3wwAv2uFHkYE6qTEmcbrjI5hEtsDxKhFDoQ2AMMmIU';
     const url = `https://deep-index.moralis.io/api/v2.2/wallets/${userAddress}/tokens?chain=${chainId}`;
     try {
       const response = await fetch(url, {
@@ -158,7 +206,6 @@ export const TransactionsProvider = ({ children }) => {
     try {
       if (!ethereum) throw new Error("Please install Web3Wallet.");
       const provider = new ethers.BrowserProvider(ethereum);
-      const signer = await provider.getSigner();
       const chainId = await ethereum.request({ method: "eth_chainId" });
       const transactionsContract = await createEthereumContract(chainId);
 
@@ -262,11 +309,13 @@ export const TransactionsProvider = ({ children }) => {
             handleChainSelect,
             chain,
             chains,
+            displayRpcUrl,
             isOpen,
             setIsOpen,
             chooseLoading,
             selected,
             setSelected,
+            gasFees,
             handleOptionClick,
             disconnectWallet,
           }}
